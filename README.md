@@ -2,6 +2,12 @@
 
 Aplicación táctil de punto de venta para **El Establo Gourmet** (Bogotá, Calle 66 #69I-01), hecha como propuesta para reemplazar/complementar el InterPOS que usan hoy.
 
+## Versión estática para Vercel
+
+El archivo **`index.html`** es la versión estática del POS, lista para desplegar en Vercel: es una sola página que funciona sola, sin servidor ni base de datos. Para publicarla, en Vercel se importa este repositorio y se despliega sin comando de compilación.
+
+Ojo: en esta versión los datos (ventas, mesas, inventario, cierres) se guardan en el navegador del equipo que la usa (localStorage), así que cada equipo lleva sus propios datos. La versión con base de datos sigue viviendo en el entorno de Muse (artefacto `pos-el-establo`).
+
 ## Qué hace
 
 - **Vender (Caja):** venta rápida por categorías, cobro en efectivo (con cálculo de vueltas), tarjeta o Nequi. Al cobrar, el stock se descuenta solo.
@@ -11,6 +17,7 @@ Aplicación táctil de punto de venta para **El Establo Gourmet** (Bogotá, Call
 - **Ventas de hoy:** total vendido, número de ventas, lo más vendido y detalle por venta.
 - **Imprimir recibo:** después de cada venta, recibo en formato térmico de 80 mm (productos, total, método de pago, recibido y vueltas). También se puede reimprimir desde Ventas de hoy.
 - **Abrir caja:** botón independiente que abre la caja sin imprimir nada, y apertura automática al cobrar en efectivo. Funciona con el impulso ESC/POS que la impresora de recibos le manda al cajón (Web Serial en Chrome): la primera vez, en el computador del local, se enlaza la impresora; la caja debe estar conectada a la impresora por el cable del cajón y la impresora configurada para abrirla.
+- **Cierre de turno:** recibo grande tipo informe Z imprimible con ventas totales por Nequi, efectivo y tarjeta, por tipo de pedido, retornos, total neto y efectivo esperado en caja. Una venta cobrada ya no se puede editar ni borrar: solo se le puede hacer un Retorno (total o parcial), que se resta en el cierre.
 
 ## La carta
 
@@ -20,6 +27,6 @@ El stock que trae el archivo es el de la demostración y se puede editar desde e
 
 ## Sobre este repositorio
 
-La aplicación en vivo corre en el entorno de Muse (artefacto `pos-el-establo`) y es una app con base de datos, así que **este repositorio no contiene el código fuente ejecutable**: el código de esa plataforma no se puede exportar a archivos. Lo que se guarda aquí es el respaldo del proyecto: la documentación de cómo funciona y el catálogo real con sus precios.
+La aplicación en vivo corre en el entorno de Muse (artefacto `pos-el-establo`) y es una app con base de datos, así que **este repositorio no contiene el código fuente ejecutable de esa versión**: el código de esa plataforma no se puede exportar a archivos. Lo que se guarda aquí es la versión estática desplegable (`index.html`), la documentación de cómo funciona y el catálogo real con sus precios.
 
-Última actualización del respaldo: 21 de noviembre de 2026.
+Última actualización: 21 de noviembre de 2026.
