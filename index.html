@@ -173,7 +173,7 @@ h2.sec{font-size:20px;margin:16px 0 10px}
   </nav>
   <div class="drawerWrap">
     <button class="drawerBtn" id="btnDrawerTop">🔓 Abrir caja</button>
-    <span class="drawerNote">La caja abre sola al imprimir el recibo. Para abrirla sin venta, usa la llave de la caja.</span>
+    <span class="drawerNote">La caja abre sola al imprimir el recibo. Sin venta, este botón la abre con el programita CajaEstablo.</span>
   </div>
 </header>
 
@@ -546,13 +546,32 @@ function printReceipt(sale){
 }
 
 /* ============ ABRIR CAJA (sin imprimir nada) ============ */
-/* Esta impresora (SAT con driver XP-80C) no tiene puerto COM, así que Web
-   Serial no sirve, y no se imprime ningún comprobante para abrir la caja
-   (gastaría papel). El driver quedó en "Push out the Cashbox #1 after
-   printing": la caja abre sola al imprimir cada recibo. Para abrirla sin
-   venta se usa la llave de la caja. El botón solo muestra ese aviso. */
+/* El programita CajaEstablo.exe escucha en http://127.0.0.1:8765 de este
+   mismo computador y manda el pulso de apertura a la impresora XP-80C
+   sin gastar papel: sin imprimir nada, sin Web Serial y sin pedir puerto.
+   Aparte, el driver quedó en "Push out the Cashbox #1 after printing":
+   la caja también abre sola al imprimir cada recibo. */
+var drawerBusy = false;
 function openDrawer(){
-  toast("La caja abre sola al imprimir el recibo. Para abrirla sin venta, usa la llave de la caja.");
+  if(drawerBusy) return;
+  drawerBusy = true;
+  var ctrl = ("AbortController" in window) ? new AbortController() : null;
+  var timer = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 2000);
+  function done(){ clearTimeout(timer); drawerBusy = false; }
+  fetch("http://127.0.0.1:8765/abrir-caja", { method:"GET", cache:"no-store", signal: ctrl ? ctrl.signal : undefined })
+    .then(function(res){ return res.json().catch(function(){ return null; }); })
+    .then(function(data){
+      done();
+      if(data && data.ok === true){ toast("Caja abierta ✔"); }
+      else{
+        var detail = data ? (data.error || data.mensaje || data.message || data.msg || data.detail || "") : "";
+        toast("Abre el programita CajaEstablo en el computador" + (detail ? " — " + detail : ""));
+      }
+    })
+    .catch(function(){
+      done();
+      toast("Abre el programita CajaEstablo en el computador");
+    });
 }
 document.getElementById("btnDrawerTop").addEventListener("click", function(){ openDrawer(); });
 
