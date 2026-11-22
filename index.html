@@ -140,16 +140,22 @@ h2.sec{font-size:20px;margin:16px 0 10px}
 .dangerZone button{background:var(--red-bg);border:1px solid var(--red);color:#ff9a9d;border-radius:10px;padding:12px 16px;font-weight:800}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#2c251c;border:1px solid var(--amber);color:var(--text);padding:13px 18px;border-radius:12px;font-weight:700;font-size:15px;z-index:90;display:none;max-width:92vw;text-align:center}
 .toast.on{display:block}
-/* Print */
+/* Print — recibo térmico 80 mm, sin encabezados del navegador */
 #printArea{display:none}
+@page{size:80mm auto;margin:0}
 @media print{
+  html,body{width:80mm !important;min-width:80mm !important;max-width:80mm !important;margin:0 !important;padding:0 !important;background:#fff !important;color:#000 !important}
   body>*{display:none !important}
-  body>#printArea{display:block !important;color:#000;background:#fff;font-family:"Courier New",monospace;font-size:13px;width:80mm;margin:0 auto;padding:4mm}
-  #printArea .c{text-align:center}
-  #printArea hr{border:none;border-top:1px dashed #000;margin:6px 0}
-  #printArea table{width:100%;border-collapse:collapse}
-  #printArea td:last-child{text-align:right}
-  #printArea .big{font-size:17px;font-weight:bold}
+  body>#printArea{display:block !important;position:static !important;width:80mm !important;max-width:80mm !important;margin:0 !important;padding:2mm !important;box-sizing:border-box;color:#000 !important;background:#fff !important;font-family:"Courier New",Courier,monospace;font-size:14px;font-weight:700;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea *{color:#000 !important;background:transparent !important;text-shadow:none !important;box-shadow:none !important;opacity:1 !important}
+  #printArea .c{text-align:center;color:#000 !important}
+  #printArea hr{border:none;border-top:2px dashed #000;margin:6px 0}
+  #printArea table{width:100%;border-collapse:collapse;color:#000 !important}
+  #printArea td{color:#000 !important;font-weight:700;padding:2px 0;vertical-align:top}
+  #printArea td:first-child{padding-right:6px}
+  #printArea td:last-child{text-align:right;white-space:nowrap}
+  #printArea .big{font-size:19px;font-weight:900;color:#000 !important}
+  #printArea b,#printArea strong{font-weight:900;color:#000 !important}
 }
 </style>
 </head>
