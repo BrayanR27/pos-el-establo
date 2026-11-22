@@ -173,7 +173,7 @@ h2.sec{font-size:20px;margin:16px 0 10px}
   </nav>
   <div class="drawerWrap">
     <button class="drawerBtn" id="btnDrawerTop">🔓 Abrir caja</button>
-    <span class="drawerNote">Abre imprimiendo un comprobante mínimo</span>
+    <span class="drawerNote">La caja abre sola al imprimir el recibo. Para abrirla sin venta, usa la llave de la caja.</span>
   </div>
 </header>
 
@@ -545,15 +545,14 @@ function printReceipt(sale){
   setTimeout(function(){ window.print(); }, 60);
 }
 
-/* ============ ABRIR CAJA (imprimiendo comprobante mínimo) ============ */
+/* ============ ABRIR CAJA (sin imprimir nada) ============ */
 /* Esta impresora (SAT con driver XP-80C) no tiene puerto COM, así que Web
-   Serial no sirve. El driver quedó en "Push out the Cashbox #1 after
-   printing": la caja abre sola después de CADA impresión. Por eso el botón
-   imprime un papelito mínimo por el flujo normal y eso dispara la apertura. */
+   Serial no sirve, y no se imprime ningún comprobante para abrir la caja
+   (gastaría papel). El driver quedó en "Push out the Cashbox #1 after
+   printing": la caja abre sola al imprimir cada recibo. Para abrirla sin
+   venta se usa la llave de la caja. El botón solo muestra ese aviso. */
 function openDrawer(){
-  document.getElementById("printArea").innerHTML =
-    '<div class="c"><b>APERTURA DE CAJA</b></div><div class="c">'+fmtDate(nowISO())+'</div>';
-  setTimeout(function(){ window.print(); }, 60);
+  toast("La caja abre sola al imprimir el recibo. Para abrirla sin venta, usa la llave de la caja.");
 }
 document.getElementById("btnDrawerTop").addEventListener("click", function(){ openDrawer(); });
 
