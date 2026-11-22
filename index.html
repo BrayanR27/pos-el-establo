@@ -28,6 +28,8 @@ button,[role="button"]{min-height:44px}
 .nav button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:16px;font-weight:700;min-height:48px}
 .nav button.on{background:var(--amber);color:#1a1408;border-color:var(--amber)}
 .drawerBtn{background:var(--green-bg);border:1px solid var(--green);color:#7fe6ab;border-radius:10px;padding:10px 14px;font-weight:800;font-size:15px;min-height:48px}
+.drawerWrap{display:flex;flex-direction:column;gap:2px}
+.drawerNote{font-size:11px;color:var(--muted);text-align:center}
 main{max-width:1200px;margin:0 auto;padding:14px 14px 90px}
 .view{display:none}.view.on{display:block}
 h2.sec{font-size:20px;margin:16px 0 10px}
@@ -169,7 +171,10 @@ h2.sec{font-size:20px;margin:16px 0 10px}
     <button data-view="inventario">Inventario</button>
     <button data-view="cierre">Cierre</button>
   </nav>
-  <button class="drawerBtn" id="btnDrawerTop">🔓 Abrir caja</button>
+  <div class="drawerWrap">
+    <button class="drawerBtn" id="btnDrawerTop">🔓 Abrir caja</button>
+    <span class="drawerNote">Abre imprimiendo un comprobante mínimo</span>
+  </div>
 </header>
 
 <main>
@@ -510,7 +515,8 @@ function finishSale(total){
   if(editCtx.kind==="extra") S.extras = S.extras.filter(function(x){ return x.id!==editCtx.id; });
   editItems = [];
   save(); closeSheet();
-  if(payMethod==="Efectivo") openDrawer(true);
+  /* Sin apertura automática: al imprimir el recibo, el driver XP-80C abre
+     la caja solo ("Cashbox #1 after printing"). */
   showSaleDone(sale);
 }
 function showSaleDone(sale){
@@ -520,7 +526,7 @@ function showSaleDone(sale){
     '<button class="btnBig" style="background:var(--panel2);border:1px solid var(--green);color:#7fe6ab;margin-top:8px" id="doneDrawer">🔓 Abrir caja</button>'+
     '<button class="btnBig btnCancel" id="doneClose">Cerrar</button>');
   document.getElementById("donePrint").addEventListener("click", function(){ printReceipt(sale); });
-  document.getElementById("doneDrawer").addEventListener("click", function(){ openDrawer(false); });
+  document.getElementById("doneDrawer").addEventListener("click", function(){ openDrawer(); });
   document.getElementById("doneClose").addEventListener("click", closeSheet);
 }
 
@@ -539,35 +545,17 @@ function printReceipt(sale){
   setTimeout(function(){ window.print(); }, 60);
 }
 
-/* ============ ABRIR CAJA (Web Serial ESC/POS) ============ */
-var serialPort = null;
-function drawerBytes(){ return new Uint8Array([0x1B,0x70,0x00,0x19,0xFA]); }
-async function openDrawer(silent){
-  if(!("serial" in navigator)){
-    if(!silent) drawerHelp();
-    return;
-  }
-  try{
-    if(!serialPort){
-      if(silent){ return; }
-      serialPort = await navigator.serial.requestPort();
-    }
-    if(!serialPort.readable || !serialPort.writable){ await serialPort.open({ baudRate: 9600 }); }
-    var w = serialPort.writable.getWriter();
-    await w.write(drawerBytes());
-    w.releaseLock();
-    if(!silent) toast("Orden de apertura enviada a la caja ✔");
-  }catch(e){
-    serialPort = null;
-    if(!silent) drawerHelp();
-  }
+/* ============ ABRIR CAJA (imprimiendo comprobante mínimo) ============ */
+/* Esta impresora (SAT con driver XP-80C) no tiene puerto COM, así que Web
+   Serial no sirve. El driver quedó en "Push out the Cashbox #1 after
+   printing": la caja abre sola después de CADA impresión. Por eso el botón
+   imprime un papelito mínimo por el flujo normal y eso dispara la apertura. */
+function openDrawer(){
+  document.getElementById("printArea").innerHTML =
+    '<div class="c"><b>APERTURA DE CAJA</b></div><div class="c">'+fmtDate(nowISO())+'</div>';
+  setTimeout(function(){ window.print(); }, 60);
 }
-function drawerHelp(){
-  openSheet('<h3>🔓 Abrir caja</h3><p class="note">La caja se abre con un comando ESC/POS que esta página envía por <b>Web Serial</b> en Chrome (computador del local). La primera vez toca el botón y elige la impresora de recibos para enlazarla; de ahí en adelante, al cobrar en efectivo la caja se abre sola.<br><br>Requisitos: la caja debe estar conectada a la impresora con el cable de cajón (puerto DK / Drawer) y la impresora conectada al computador. Desde el celular no se puede abrir la caja física, porque la impresora está en el computador.<br><br>Si este navegador no soporta Web Serial, usa Chrome en el computador del local.</p><button class="btnBig btnAmber" id="dhTry">Intentar enlazar impresora</button><button class="btnBig btnCancel" id="dhClose">Cerrar</button>');
-  document.getElementById("dhClose").addEventListener("click", closeSheet);
-  document.getElementById("dhTry").addEventListener("click", function(){ closeSheet(); openDrawer(false); });
-}
-document.getElementById("btnDrawerTop").addEventListener("click", function(){ openDrawer(false); });
+document.getElementById("btnDrawerTop").addEventListener("click", function(){ openDrawer(); });
 
 /* ============ MODAL ============ */
 function openSheet(html){ document.getElementById("sheet").innerHTML = html; document.getElementById("overlay").classList.add("on"); }
